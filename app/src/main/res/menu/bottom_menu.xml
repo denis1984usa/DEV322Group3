@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:title="@string/walking"
+        android:icon="@drawable/ic_walking"
+        android:id="@+id/id_walking"
+        android:orderInCategory="100" />
+    <item
+        android:title="@string/routes"
+        android:icon="@drawable/ic_routes"
+        android:id="@+id/id_routes"
+        android:orderInCategory="200" />
+</menu>
