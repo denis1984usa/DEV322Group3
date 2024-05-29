@@ -2,4 +2,6 @@
     <string name="app_name">MoveMore</string>
     <string name="walking">Walking</string>
     <string name="routes">Routes</string>
+    <string name="location_disabled">Location is disabled</string>
+    <string name="location_dialog_message">Would you like to enable GPS?</string>
 </resources>

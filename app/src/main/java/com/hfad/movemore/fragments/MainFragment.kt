@@ -2,20 +2,25 @@ package com.hfad.movemore.fragments
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.hfad.movemore.R
 import com.hfad.movemore.databinding.FragmentMainBinding
 import com.hfad.movemore.databinding.RoutesBinding
 import com.hfad.movemore.databinding.ViewRouteBinding
+import com.hfad.movemore.utils.DialogManager
 import com.hfad.movemore.utils.checkPermission
 import com.hfad.movemore.utils.showToast
 import org.osmdroid.config.Configuration
@@ -41,12 +46,20 @@ class MainFragment : Fragment() {
     // This function runs after the map markup has been downloaded to memory
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //initOSM()
         registerPermissions()
+    }
+
+    // Hanna: Updating location status when returning to the app
+    override fun onResume(){
+        super.onResume()
         checkLocationPermission() //launch it only after register permission
     }
 
-    // Function that allows to download maps from the Internet
+    override fun onPause() {
+        super.onPause()
+    }
+
+    // Hanna: Function that allows to download maps from the Internet
     private fun settingsOsm() {
         Configuration.getInstance().load(
             activity as AppCompatActivity,
@@ -55,7 +68,7 @@ class MainFragment : Fragment() {
         Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
     }
 
-    // Connecting GPS provider for getting current location and location tracking
+    // Hanna: Connecting GPS provider for getting current location and location tracking
     private fun initOSM() = with(binding) {
         map.controller.setZoom(15.0)
        // map.controller.animateTo(GeoPoint(47.5853, -122.1480))
@@ -76,7 +89,7 @@ class MainFragment : Fragment() {
         }, 1000) // 1 second delay
     }
 
-    // Register permissions function
+    // Hanna: Register permissions function
     private fun registerPermissions() {
         pLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()) {
@@ -92,7 +105,7 @@ class MainFragment : Fragment() {
         }
     }
 
-    // Function that check the Android version and asks for location permission
+    // Hanna: Function that check the Android version and asks for location permission
     private fun checkLocationPermission() {
         // check Android version if greater or equal Android 10 version
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -102,15 +115,16 @@ class MainFragment : Fragment() {
         }
     }
 
-    // checking both permissions in Android 10 and greater (newer)
+    // Hanna: checking both permissions in Android 10 and greater (newer)
+    @RequiresApi(Build.VERSION_CODES.Q)
     private fun checkPermissionAndroidTenAndGreater() {
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
             && checkPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         ) {
-            initOSM()
+            initOSM() // map initialisation
             checkLocationEnabled()
         } else {
-            // if only one permission or none permissions are granted
+            // Calling a dialog if only one permission or none permissions are granted
             pLauncher.launch(
                 arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
@@ -120,13 +134,13 @@ class MainFragment : Fragment() {
         }
     }
 
-    // checking only one permission in Android 9 and lesser (older)
+    // Hanna: checking only one permission in Android 9 and lesser (older)
     private fun checkPermissionBeforeAndroidTen() {
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
-            initOSM()
+            initOSM() // map initialisation
             checkLocationEnabled()
         } else {
-            // if the permission wasn't granted
+            // Calling a dialog if the permission wasn't granted
             pLauncher.launch(
                 arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
@@ -135,14 +149,25 @@ class MainFragment : Fragment() {
         }
     }
 
-    // Check whether GPS has enabled on the device
+    // Hanna: Check whether GPS has enabled on the device
     private fun checkLocationEnabled() {
         val locationManager = activity?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val isEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
         if (!isEnabled) {
-            showToast("GPS disabled")
+            // call function from DialogManager
+            DialogManager.showLocationEnableDialog(
+                activity as AppCompatActivity,
+                // Calling interface from DialogManger
+                object: DialogManager.Listener {
+                    override fun onClick() {
+                        // Open location settings on a device
+                        startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                    }
+
+                }
+            )
         } else {
-            showToast("GPS enabled")
+            showToast("GPS is enabled")
         }
     }
 
