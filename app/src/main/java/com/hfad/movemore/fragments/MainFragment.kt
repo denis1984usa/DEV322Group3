@@ -15,19 +15,27 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import com.hfad.movemore.R
 import com.hfad.movemore.databinding.FragmentMainBinding
 import com.hfad.movemore.location.LocationService
 import com.hfad.movemore.utils.DialogManager
+import com.hfad.movemore.utils.TimeUtils
 import com.hfad.movemore.utils.checkPermission
 import com.hfad.movemore.utils.showToast
 import org.osmdroid.config.Configuration
 import org.osmdroid.library.BuildConfig
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.util.Timer
+import java.util.TimerTask
 
 class MainFragment : Fragment() {
     private var isServiceRunning = false
+    private var timer: Timer? = null // class Timer
+    private var startTime = 0L // variable to store the start time
+    private val timeData = MutableLiveData<String>()
     private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var binding: FragmentMainBinding
 
@@ -45,36 +53,65 @@ class MainFragment : Fragment() {
         registerPermissions()
         setOnClicks()
         checkServiceState()
+        updateTime()
     }
 
     private fun setOnClicks() = with(binding) {
         val listener = onClicks()
-        fStartStop.setOnClickListener(listener) // Use the correct ID here
+        fStartStop.setOnClickListener(listener) // Ensure fStartStop is the correct ID
     }
 
     private fun onClicks(): View.OnClickListener {
         return View.OnClickListener {
             when (it.id) {
-                R.id.fStartStop -> startStopService() // Use the correct ID here
+                R.id.fStartStop -> startStopService() // Ensure fStartStop is the correct ID
             }
         }
+    }
+
+    private fun updateTime() {
+        timeData.observe(viewLifecycleOwner, Observer {
+            binding.tvTime.text = it // Ensure tvTime is correctly referenced
+        })
+    }
+
+    // Start Timer
+    private fun startTimer() {
+        timer?.cancel()
+        timer = Timer()
+        startTime = LocationService.startTime // start timer from current time in milliseconds
+        timer?.schedule(object : TimerTask() {
+            override fun run() {
+                activity?.runOnUiThread {
+                    timeData.value = getCurrentTime() // Ensure getCurrentTime() is defined
+                }
+            }
+        }, 1, 1) // update timer every millisecond
+    }
+
+    // Calculate difference between current time and start time
+    private fun getCurrentTime(): String {
+        return "Time: ${TimeUtils.getTime(System.currentTimeMillis() - startTime)}"
     }
 
     private fun startStopService() {
         if (!isServiceRunning) { // if service is not launched yet
             startLocService() // launch the service
+            startTimer() // Start the timer when the service starts
         } else {
             activity?.stopService(Intent(activity, LocationService::class.java))
             binding.fStartStop.setImageResource(R.drawable.ic_play)
+            timer?.cancel()
         }
         isServiceRunning = !isServiceRunning
     }
 
-    // Location service continue working after tapping on notification message
-    private fun checkServiceState(){
+    // Location service continues working after tapping on notification message
+    private fun checkServiceState() {
         isServiceRunning = LocationService.isRunning
-        if(isServiceRunning){
+        if (isServiceRunning) {
             binding.fStartStop.setImageResource(R.drawable.ic_stop)
+            startTimer()
         }
     }
 
@@ -86,11 +123,13 @@ class MainFragment : Fragment() {
             activity?.startService(Intent(activity, LocationService::class.java))
         }
         binding.fStartStop.setImageResource(R.drawable.ic_stop)
+        LocationService.startTime = System.currentTimeMillis()
+        startTimer()
     }
 
     override fun onResume() {
         super.onResume()
-        checkLocationPermission() //launch it only after registering permission
+        checkLocationPermission() // Launch it only after registering permission
     }
 
     private fun settingsOsm() {
@@ -119,7 +158,8 @@ class MainFragment : Fragment() {
 
     private fun registerPermissions() {
         pLauncher = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()) {
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) {
             if (it[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
                 initOSM()
                 checkLocationEnabled()
@@ -189,5 +229,3 @@ class MainFragment : Fragment() {
         fun newInstance() = MainFragment()
     }
 }
-
-

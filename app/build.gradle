@@ -39,6 +39,7 @@ android {
 dependencies {
     implementation 'org.osmdroid:osmdroid-android:6.1.10' // libraries for OpenStreetMaps
     implementation 'com.github.MKergall:osmbonuspack:6.7.0' // libraries for OpenStreetMaps
+    implementation 'com.google.android.gms:play-services-location:21.3.0' // FusedLocationUpdate client
 
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
