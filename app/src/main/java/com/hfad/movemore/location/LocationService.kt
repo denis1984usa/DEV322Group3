@@ -23,6 +23,7 @@ class LocationService : Service() {
     // If START_NOT_STICKY - the process will not be relaunched after freeing up resources.
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startNotification() // start notification
+        isRunning = true
         return START_STICKY // service will relaunch but all variables will be lost.
     }
 
@@ -32,6 +33,7 @@ class LocationService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        isRunning = false
     }
 
     private fun startNotification() {
@@ -67,5 +69,6 @@ class LocationService : Service() {
     // Create objects
     companion object {
         const val CHANNEL_ID = "channel_1"
+        var isRunning = false
     }
 }

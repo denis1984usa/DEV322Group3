@@ -44,6 +44,7 @@ class MainFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         registerPermissions()
         setOnClicks()
+        checkServiceState()
     }
 
     private fun setOnClicks() = with(binding) {
@@ -60,20 +61,31 @@ class MainFragment : Fragment() {
     }
 
     private fun startStopService() {
-        if (!isServiceRunning) {
-            startLocService()
+        if (!isServiceRunning) { // if service is not launched yet
+            startLocService() // launch the service
         } else {
             activity?.stopService(Intent(activity, LocationService::class.java))
+            binding.fStartStop.setImageResource(R.drawable.ic_play)
         }
         isServiceRunning = !isServiceRunning
     }
 
+    // Location service continue working after tapping on notification message
+    private fun checkServiceState(){
+        isServiceRunning = LocationService.isRunning
+        if(isServiceRunning){
+            binding.fStartStop.setImageResource(R.drawable.ic_stop)
+        }
+    }
+
+    // Run location service
     private fun startLocService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             activity?.startForegroundService(Intent(activity, LocationService::class.java))
         } else {
             activity?.startService(Intent(activity, LocationService::class.java))
         }
+        binding.fStartStop.setImageResource(R.drawable.ic_stop)
     }
 
     override fun onResume() {
