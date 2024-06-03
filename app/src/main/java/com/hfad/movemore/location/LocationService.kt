@@ -7,11 +7,14 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Build
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -20,11 +23,16 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY
 import com.hfad.movemore.MainActivity
 import com.hfad.movemore.R
+import org.osmdroid.util.GeoPoint
 
 // Hanna: Implement Location Service
 class LocationService : Service() {
+    // Global Variables
+    private var distance = 0.0f;
+    private var lastLocation: Location? = null
     private lateinit var locProvider: FusedLocationProviderClient
     private lateinit var locRequest: LocationRequest
+    private lateinit var geoPointsList: ArrayList<GeoPoint>
     override fun onBind(intent: Intent?): IBinder? {
         return null // do not bind with activity
     }
@@ -41,6 +49,7 @@ class LocationService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        geoPointsList = java.util.ArrayList()
         initLocation()
     }
 
@@ -50,11 +59,34 @@ class LocationService : Service() {
         locProvider.removeLocationUpdates(locCalBack)// Stop receiving Request location information
     }
 
-    private val locCalBack = object : LocationCallback(){
+    private val locCalBack = object : LocationCallback() {
         override fun onLocationResult(lResult: LocationResult) {
             super.onLocationResult(lResult)
-            //lResult.lastLocation // last known location of a mobile device, contains coordinates
+            val currentLocation = lResult.lastLocation
+            if (lastLocation != null && currentLocation != null) {
+                // measure from old to new location
+                distance += lastLocation?.distanceTo(currentLocation)!!
+                geoPointsList.add(GeoPoint(currentLocation.latitude, currentLocation.longitude))
+                // Save location information
+                val locModel = LocationModel(
+                    currentLocation.speed,
+                    distance,
+                    geoPointsList
+                )
+                sendLocData(locModel)
+            }
+            lastLocation = currentLocation
+
+            // Log.d("MyLog", "Distance: $distance") // Filtered Logcat logs
         }
+    }
+    // Send locations information saved in LocationModel
+    private fun sendLocData(locModel: LocationModel) {
+        // Create Intent
+        val i = Intent(LOC_MODEL_INTENT)
+        i.putExtra(LOC_MODEL_INTENT, locModel)
+        // Send Intent via Broadcast
+        LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(i)
     }
 
     private fun startNotification() {
@@ -112,6 +144,7 @@ class LocationService : Service() {
 
     // Create objects
     companion object {
+        const val LOC_MODEL_INTENT = "loc_intent"
         const val CHANNEL_ID = "channel_1"
         var isRunning = false
         var startTime = 0L

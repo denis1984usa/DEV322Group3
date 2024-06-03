@@ -1,12 +1,15 @@
 package com.hfad.movemore.fragments
 
 import android.Manifest
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.hfad.movemore.MainViewModel
 import com.hfad.movemore.R
 import com.hfad.movemore.databinding.FragmentMainBinding
 import com.hfad.movemore.location.LocationService
@@ -30,14 +35,16 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.util.Timer
 import java.util.TimerTask
+import com.hfad.movemore.location.LocationModel as LocationModel
+
 
 class MainFragment : Fragment() {
     private var isServiceRunning = false
     private var timer: Timer? = null // class Timer
     private var startTime = 0L // variable to store the start time
-    private val timeData = MutableLiveData<String>()
     private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var binding: FragmentMainBinding
+    private val model: MainViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,6 +61,8 @@ class MainFragment : Fragment() {
         setOnClicks()
         checkServiceState()
         updateTime()
+        registerLocReceiver()
+        locationUpdates()
     }
 
     private fun setOnClicks() = with(binding) {
@@ -69,8 +78,17 @@ class MainFragment : Fragment() {
         }
     }
 
+    private fun locationUpdates() = with(binding){
+        model.locationUpdates.observe(viewLifecycleOwner) {
+            val distance = "Distance: ${String.format("%.1f", it.distance)} m"
+            val speed = "Speed: ${String.format("%.1f", 3.6 * it.speed)} km/h"
+            tvDistance.text = distance
+            tvSpeed.text = speed
+        }
+    }
+
     private fun updateTime() {
-        timeData.observe(viewLifecycleOwner, Observer {
+        model.timeData.observe(viewLifecycleOwner, Observer {
             binding.tvTime.text = it // Ensure tvTime is correctly referenced
         })
     }
@@ -83,7 +101,7 @@ class MainFragment : Fragment() {
         timer?.schedule(object : TimerTask() {
             override fun run() {
                 activity?.runOnUiThread {
-                    timeData.value = getCurrentTime() // Ensure getCurrentTime() is defined
+                    model.timeData.value = getCurrentTime() // Ensure getCurrentTime() is defined
                 }
             }
         }, 1, 1) // update timer every millisecond
@@ -222,6 +240,23 @@ class MainFragment : Fragment() {
         } else {
             showToast("GPS is enabled")
         }
+    }
+
+    // Broadcast receiver
+    private val receiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, i: Intent?) {
+            if (i?.action == LocationService.LOC_MODEL_INTENT ){
+                val locModel = i.getSerializableExtra(LocationService.LOC_MODEL_INTENT) as LocationModel
+                model.locationUpdates.value = locModel
+            }
+        }
+    }
+
+    // Specify what Intents we want to receive
+    private fun registerLocReceiver(){
+        val locFilter = IntentFilter(LocationService.LOC_MODEL_INTENT)
+        LocalBroadcastManager.getInstance(activity as AppCompatActivity)
+            .registerReceiver(receiver, locFilter)
     }
 
     companion object {
