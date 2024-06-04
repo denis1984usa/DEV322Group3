@@ -50,8 +50,9 @@
         app:layout_constraintEnd_toEndOf="@+id/my_location_btn"
         app:layout_constraintTop_toBottomOf="@+id/my_location_btn" />
 
+    <!-- fragment_main.xml -->
     <TextView
-        android:id="@+id/textView_Time"
+        android:id="@+id/tvTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -59,13 +60,13 @@
         android:background="#99FFFFFF"
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
-        android:text="Time: 00:00:00"
+        android:text="Time: 00:00:00:000"
         android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView_AvrSpeed"
+        android:id="@+id/tvAvrSpeed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -73,13 +74,13 @@
         android:background="#99FFFFFF"
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
-        android:text="Average Speed: 2.5 mph"
+        android:text="Average Speed: 0.0 mph"
         android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView_Time" />
+        app:layout_constraintTop_toBottomOf="@+id/tvTime" />
 
     <TextView
-        android:id="@+id/textView_Speed"
+        android:id="@+id/tvSpeed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -87,12 +88,13 @@
         android:background="#99FFFFFF"
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
-        android:text="Current Speed: 3.0 mph"
+        android:text="Current Speed: 0.0 mph"
+        android:textColor="#000000"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView_AvrSpeed" />
+        app:layout_constraintTop_toBottomOf="@+id/tvAvrSpeed" />
 
     <TextView
-        android:id="@+id/textView_Distance"
+        android:id="@+id/tvDistance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -100,11 +102,11 @@
         android:background="#99FFFFFF"
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
-        android:text="Distance: 15 mi"
+        android:text="Distance: 0.0 mi"
         android:textColor="@color/black"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView_Speed" />
+        app:layout_constraintTop_toBottomOf="@+id/tvSpeed" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
