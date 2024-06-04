@@ -18,6 +18,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -81,7 +82,7 @@ class MainFragment : Fragment() {
     private fun locationUpdates() = with(binding){
         model.locationUpdates.observe(viewLifecycleOwner) {
             val distance = "Distance: ${String.format("%.1f", it.distance)} m"
-            val speed = "Speed: ${String.format("%.1f", 3.6 * it.speed)} km/h"
+            val speed = "Speed: ${String.format("%.1f", 2.23694 * it.speed)} mph"
             tvDistance.text = distance
             tvSpeed.text = speed
         }
