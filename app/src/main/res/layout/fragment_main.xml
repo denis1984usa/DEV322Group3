@@ -66,7 +66,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView_AvrSpeed"
+        android:id="@+id/tvAvrSpeed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -74,7 +74,7 @@
         android:background="#99FFFFFF"
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
-        android:text="Average Speed: 2.5 mph"
+        android:text="Average Speed: 0.0 mph"
         android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTime" />
@@ -91,7 +91,7 @@
         android:text="Current Speed: 0.0 mph"
         android:textColor="#000000"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView_AvrSpeed" />
+        app:layout_constraintTop_toBottomOf="@+id/tvAvrSpeed" />
 
     <TextView
         android:id="@+id/tvDistance"

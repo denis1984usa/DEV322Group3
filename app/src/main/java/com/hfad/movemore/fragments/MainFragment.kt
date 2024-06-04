@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
@@ -32,6 +33,8 @@ import com.hfad.movemore.utils.checkPermission
 import com.hfad.movemore.utils.showToast
 import org.osmdroid.config.Configuration
 import org.osmdroid.library.BuildConfig
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.util.Timer
@@ -40,7 +43,9 @@ import com.hfad.movemore.location.LocationModel as LocationModel
 
 
 class MainFragment : Fragment() {
+    private var pl: Polyline? = null // class Polyline
     private var isServiceRunning = false
+    private var firstStart = true
     private var timer: Timer? = null // class Timer
     private var startTime = 0L // variable to store the start time
     private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
@@ -83,8 +88,11 @@ class MainFragment : Fragment() {
         model.locationUpdates.observe(viewLifecycleOwner) {
             val distance = "Distance: ${String.format("%.1f", it.distance)} m"
             val speed = "Speed: ${String.format("%.1f", 2.23694 * it.speed)} mph"
+            val aSpeed = "Average Speed: ${getAverageSpeed((it.distance))} mph"
             tvDistance.text = distance
             tvSpeed.text = speed
+            tvAvrSpeed.text = aSpeed
+            updatePolyline(it.geoPointList)
         }
     }
 
@@ -106,6 +114,12 @@ class MainFragment : Fragment() {
                 }
             }
         }, 1, 1) // update timer every millisecond
+    }
+
+    // Calculate average speed
+    // The average speed in mph: 2.23694f * meters per second (m/s).
+    private fun getAverageSpeed(distance: Float) : String {
+        return String.format("%.1f", 2.23694f * (distance / ((System.currentTimeMillis() - startTime) / 1000.0f)))
     }
 
     // Calculate difference between current time and start time
@@ -160,6 +174,8 @@ class MainFragment : Fragment() {
     }
 
     private fun initOSM() = with(binding) {
+        pl = Polyline()
+        pl?.outlinePaint?.color = Color.BLUE  // polyline color: Blue
         map.controller.setZoom(15.0)
         val myLocProvider = GpsMyLocationProvider(activity)
         val myLocOverlay = MyLocationNewOverlay(myLocProvider, map)
@@ -168,6 +184,7 @@ class MainFragment : Fragment() {
         myLocOverlay.runOnFirstFix {
             map.overlays.clear()
             map.overlays.add(myLocOverlay)
+            map.overlays.add(pl)
         }
 
         map.postDelayed({
@@ -258,6 +275,33 @@ class MainFragment : Fragment() {
         val locFilter = IntentFilter(LocationService.LOC_MODEL_INTENT)
         LocalBroadcastManager.getInstance(activity as AppCompatActivity)
             .registerReceiver(receiver, locFilter)
+    }
+
+    // Add points to draw a polyline
+    private fun addPoint(list: List<GeoPoint>){
+        pl?.addPoint(list[list.size - 1])
+    }
+    // Fill polyline from GeoPoint arrayList, also when the app is in background
+    // This function should be launched only once
+    private fun fillPolyline(list: List<GeoPoint>){
+        list.forEach {
+            pl?.addPoint(it)
+        }
+    }
+
+    private fun updatePolyline(list : List<GeoPoint>){
+        if (list.size > 1 && firstStart){
+            fillPolyline(list)
+            firstStart = false
+        } else {
+            addPoint(list)
+        }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        LocalBroadcastManager.getInstance(activity as AppCompatActivity)
+            .unregisterReceiver(receiver)
     }
 
     companion object {
