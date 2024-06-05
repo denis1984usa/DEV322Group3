@@ -2,8 +2,12 @@ package com.hfad.movemore.utils
 
 import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.view.LayoutInflater
 import android.widget.Toast
 import com.hfad.movemore.R
+import com.hfad.movemore.databinding.SaveDialogBinding
 
 // Hanna
 object DialogManager {
@@ -21,6 +25,25 @@ object DialogManager {
             Toast.makeText(context, "NO", Toast.LENGTH_SHORT).show()
         }
         dialog.show()
+    }
+
+    // Show Save Routes dialog (with custom layout)
+    fun showSaveDialog(context: Context, listener: Listener) {
+        val builder = AlertDialog.Builder(context)
+        val binding = SaveDialogBinding.inflate(LayoutInflater.from(context), null, false)
+        builder.setView(binding.root)
+        val dialog = builder.create()
+        binding.apply {
+            bSave.setOnClickListener {
+                listener.onClick()
+                dialog.dismiss()
+            }
+            bCancel.setOnClickListener {
+                dialog.dismiss()
+            }
+        }
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.show() // Launch the dialog
     }
 
     // Hanna: Creating an interface
