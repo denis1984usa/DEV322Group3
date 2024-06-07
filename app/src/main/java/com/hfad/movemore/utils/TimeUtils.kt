@@ -5,13 +5,19 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.TimeZone
 
+@SuppressLint("SimpleDateFormat")
 object TimeUtils {
-    @SuppressLint("SimpleDateFormat")
+    val timeFormatter = SimpleDateFormat("HH:mm:ss:SSS")
+    val dateFormatter = SimpleDateFormat("mm/DD/yyyy HH:mm")
     fun getTime(timeInMillis: Long): String {
-        val timeFormatter = SimpleDateFormat("HH:mm:ss:SSS")
         timeFormatter.timeZone = TimeZone.getTimeZone("UTC")
         val cv = Calendar.getInstance()
         cv.timeInMillis = timeInMillis
         return timeFormatter.format(cv.time)
+    }
+
+    fun getDate(): String {
+        val cv = Calendar.getInstance()
+        return dateFormatter.format(cv.time)
     }
 }

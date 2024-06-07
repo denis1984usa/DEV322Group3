@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
+import android.graphics.Point
+import androidx.lifecycle.MutableLiveData
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
@@ -20,12 +22,13 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.hfad.movemore.db.MainApp
 import com.hfad.movemore.MainViewModel
 import com.hfad.movemore.R
 import com.hfad.movemore.databinding.FragmentMainBinding
+import com.hfad.movemore.db.RouteItem
 import com.hfad.movemore.location.LocationService
 import com.hfad.movemore.utils.DialogManager
 import com.hfad.movemore.utils.TimeUtils
@@ -43,6 +46,7 @@ import com.hfad.movemore.location.LocationModel as LocationModel
 
 
 class MainFragment : Fragment() {
+    private var locationModel: LocationModel? = null
     private var pl: Polyline? = null // class Polyline
     private var isServiceRunning = false
     private var firstStart = true
@@ -50,7 +54,10 @@ class MainFragment : Fragment() {
     private var startTime = 0L // variable to store the start time
     private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var binding: FragmentMainBinding
-    private val model: MainViewModel by activityViewModels()
+    private val model: MainViewModel by activityViewModels{
+        // Reference to the MainApp class, and MainApp class contains initialized database
+        MainViewModel.ViewModelFactory((requireContext().applicationContext as MainApp).db)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -69,6 +76,9 @@ class MainFragment : Fragment() {
         updateTime()
         registerLocReceiver()
         locationUpdates()
+        model.routes.observe(viewLifecycleOwner) {
+            Log.d("MyLog", "List size")
+        }
     }
 
     private fun setOnClicks() = with(binding) {
@@ -88,10 +98,11 @@ class MainFragment : Fragment() {
         model.locationUpdates.observe(viewLifecycleOwner) {
             val distance = "Distance: ${String.format("%.1f", it.distance)} m"
             val speed = "Speed: ${String.format("%.1f", 2.23694 * it.speed)} mph"
-            val aSpeed = "Average Speed: ${getAverageSpeed((it.distance))} mph"
+            val aSpeed = "Average Speed: ${getAverageSpeed(it.distance)} mph"
             tvDistance.text = distance
             tvSpeed.text = speed
             tvAvrSpeed.text = aSpeed
+            locationModel = it
             updatePolyline(it.geoPointList)
         }
     }
@@ -113,7 +124,7 @@ class MainFragment : Fragment() {
                     model.timeData.value = getCurrentTime() // Ensure getCurrentTime() is defined
                 }
             }
-        }, 1, 1) // update timer every millisecond
+        }, 1, 1000) // update timer every second
     }
 
     // Calculate average speed
@@ -127,6 +138,15 @@ class MainFragment : Fragment() {
         return "Time: ${TimeUtils.getTime(System.currentTimeMillis() - startTime)}"
     }
 
+    private fun geoPointsToString(list: List<GeoPoint>): String {
+        val sb = StringBuilder()
+        list.forEach {
+            sb.append("${it.latitude}, ${it.longitude}/")
+        }
+        Log.d("MyLog", "Points: $sb")
+        return sb.toString()
+    }
+
     private fun startStopService() {
         if (!isServiceRunning) { // if service is not launched yet
             startLocService() // launch the service
@@ -135,13 +155,30 @@ class MainFragment : Fragment() {
             activity?.stopService(Intent(activity, LocationService::class.java))
             binding.fStartStop.setImageResource(R.drawable.ic_play)
             timer?.cancel()
-            DialogManager.showSaveDialog(requireContext(), object : DialogManager.Listener {
-                override fun onClick() {
-                    showToast("Route Saved!")
-                }
-            })
+            val route = getRouteItem()
+            DialogManager.showSaveDialog(requireContext(),
+                route,
+                object : DialogManager.Listener {
+                    override fun onClick() {
+                        showToast("Route Saved!")
+                        model.insertRoute(route)
+                    }
+                })
         }
         isServiceRunning = !isServiceRunning
+    }
+
+    // Get Route Item
+    private fun getRouteItem(): RouteItem {
+        return RouteItem(
+            null,
+            getCurrentTime(),
+            TimeUtils.getDate(),
+            String.format("%.1f", locationModel?.distance?.div(1609.34) ?: 0),
+            getAverageSpeed(locationModel?.distance ?: 0.0f),
+            geoPointsToString(locationModel?.geoPointList ?: listOf())
+
+        )
     }
 
     // Location service continues working after tapping on notification message
