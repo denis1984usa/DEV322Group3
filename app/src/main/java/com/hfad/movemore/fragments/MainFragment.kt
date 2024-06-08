@@ -26,6 +26,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.hfad.movemore.MainViewModel
 import com.hfad.movemore.R
 import com.hfad.movemore.databinding.FragmentMainBinding
+import com.hfad.movemore.db.RouteItem
 import com.hfad.movemore.location.LocationService
 import com.hfad.movemore.utils.DialogManager
 import com.hfad.movemore.utils.TimeUtils
@@ -43,6 +44,7 @@ import com.hfad.movemore.location.LocationModel as LocationModel
 
 
 class MainFragment : Fragment() {
+    private var routeItem: RouteItem? = null
     private var pl: Polyline? = null // class Polyline
     private var isServiceRunning = false
     private var firstStart = true
@@ -87,11 +89,19 @@ class MainFragment : Fragment() {
     private fun locationUpdates() = with(binding){
         model.locationUpdates.observe(viewLifecycleOwner) {
             val distance = "Distance: ${String.format("%.1f", it.distance)} m"
-            val speed = "Speed: ${String.format("%.1f", 2.23694 * it.speed)} mph"
+            val speed = "Speed: ${String.format("%.1f", 2.23694f * it.speed)} mph"
             val aSpeed = "Average Speed: ${getAverageSpeed((it.distance))} mph"
             tvDistance.text = distance
             tvSpeed.text = speed
             tvAvrSpeed.text = aSpeed
+            routeItem = RouteItem(
+                null,
+                getCurrentTime(),
+                TimeUtils.getDate(),
+                String.format("%.1f", it.distance /  1609.34),
+                String.format("%.1f", 2.23694f * it.speed),
+                geoPoints = ""
+            )
             updatePolyline(it.geoPointList)
         }
     }
@@ -135,7 +145,9 @@ class MainFragment : Fragment() {
             activity?.stopService(Intent(activity, LocationService::class.java))
             binding.fStartStop.setImageResource(R.drawable.ic_play)
             timer?.cancel()
-            DialogManager.showSaveDialog(requireContext(), object : DialogManager.Listener {
+            DialogManager.showSaveDialog(requireContext(),
+                routeItem,
+                object : DialogManager.Listener {
                 override fun onClick() {
                     showToast("Route Saved!")
                 }

@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.widget.Toast
 import com.hfad.movemore.R
 import com.hfad.movemore.databinding.SaveDialogBinding
+import com.hfad.movemore.db.RouteItem
 
 // Hanna
 object DialogManager {
@@ -28,12 +29,15 @@ object DialogManager {
     }
 
     // Show Save Routes dialog (with custom layout)
-    fun showSaveDialog(context: Context, listener: Listener) {
+    fun showSaveDialog(context: Context, item: RouteItem?, listener: Listener) {
         val builder = AlertDialog.Builder(context)
         val binding = SaveDialogBinding.inflate(LayoutInflater.from(context), null, false)
         builder.setView(binding.root)
         val dialog = builder.create()
         binding.apply {
+            tvTimeDialog.text = "${item?.time} h"
+            tvSpeedDialog.text = "${item?.speed} mph"
+            tvDistanceDialog.text = "${item?.distance} mi"
             bSave.setOnClickListener {
                 listener.onClick()
                 dialog.dismiss()
