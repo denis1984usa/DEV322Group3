@@ -44,7 +44,7 @@ import com.hfad.movemore.location.LocationModel as LocationModel
 
 
 class MainFragment : Fragment() {
-    private var routeItem: RouteItem? = null
+    private var locationModel: LocationModel? = null
     private var pl: Polyline? = null // class Polyline
     private var isServiceRunning = false
     private var firstStart = true
@@ -94,14 +94,7 @@ class MainFragment : Fragment() {
             tvDistance.text = distance
             tvSpeed.text = speed
             tvAvrSpeed.text = aSpeed
-            routeItem = RouteItem(
-                null,
-                getCurrentTime(),
-                TimeUtils.getDate(),
-                String.format("%.1f", it.distance /  1609.34),
-                String.format("%.1f", 2.23694f * it.speed),
-                geoPoints = ""
-            )
+            locationModel = it
             updatePolyline(it.geoPointList)
         }
     }
@@ -137,6 +130,15 @@ class MainFragment : Fragment() {
         return "Time: ${TimeUtils.getTime(System.currentTimeMillis() - startTime)}"
     }
 
+    private fun geoPointsToString(list: List<GeoPoint>): String {
+        val sb = StringBuilder()
+        list.forEach {
+            sb.append("${it.latitude}, ${it.longitude}/")
+        }
+        Log.d("MyLog", "Points: $sb")
+        return sb.toString()
+    }
+
     private fun startStopService() {
         if (!isServiceRunning) { // if service is not launched yet
             startLocService() // launch the service
@@ -146,7 +148,7 @@ class MainFragment : Fragment() {
             binding.fStartStop.setImageResource(R.drawable.ic_play)
             timer?.cancel()
             DialogManager.showSaveDialog(requireContext(),
-                routeItem,
+                getRouteItem(),
                 object : DialogManager.Listener {
                 override fun onClick() {
                     showToast("Route Saved!")
@@ -154,6 +156,18 @@ class MainFragment : Fragment() {
             })
         }
         isServiceRunning = !isServiceRunning
+    }
+
+    // Get Route Item
+    private fun getRouteItem(): RouteItem {
+        return RouteItem(
+            null,
+            getCurrentTime(),
+            TimeUtils.getDate(),
+            String.format("%.1f", locationModel?.distance?.div(1609.34) ?: 0),
+            getAverageSpeed(locationModel?.distance ?: 0.0f),
+            geoPointsToString(locationModel?.geoPointList ?: listOf())
+        )
     }
 
     // Location service continues working after tapping on notification message
