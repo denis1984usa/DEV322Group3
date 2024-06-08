@@ -26,6 +26,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.hfad.movemore.MainViewModel
 import com.hfad.movemore.R
 import com.hfad.movemore.databinding.FragmentMainBinding
+import com.hfad.movemore.db.RouteItem
 import com.hfad.movemore.location.LocationService
 import com.hfad.movemore.utils.DialogManager
 import com.hfad.movemore.utils.TimeUtils
@@ -43,6 +44,7 @@ import com.hfad.movemore.location.LocationModel as LocationModel
 
 
 class MainFragment : Fragment() {
+    private var locationModel: LocationModel? = null
     private var pl: Polyline? = null // class Polyline
     private var isServiceRunning = false
     private var firstStart = true
@@ -87,11 +89,12 @@ class MainFragment : Fragment() {
     private fun locationUpdates() = with(binding){
         model.locationUpdates.observe(viewLifecycleOwner) {
             val distance = "Distance: ${String.format("%.1f", it.distance)} m"
-            val speed = "Speed: ${String.format("%.1f", 2.23694 * it.speed)} mph"
+            val speed = "Speed: ${String.format("%.1f", 2.23694f * it.speed)} mph"
             val aSpeed = "Average Speed: ${getAverageSpeed((it.distance))} mph"
             tvDistance.text = distance
             tvSpeed.text = speed
             tvAvrSpeed.text = aSpeed
+            locationModel = it
             updatePolyline(it.geoPointList)
         }
     }
@@ -127,6 +130,15 @@ class MainFragment : Fragment() {
         return "Time: ${TimeUtils.getTime(System.currentTimeMillis() - startTime)}"
     }
 
+    private fun geoPointsToString(list: List<GeoPoint>): String {
+        val sb = StringBuilder()
+        list.forEach {
+            sb.append("${it.latitude}, ${it.longitude}/")
+        }
+        Log.d("MyLog", "Points: $sb")
+        return sb.toString()
+    }
+
     private fun startStopService() {
         if (!isServiceRunning) { // if service is not launched yet
             startLocService() // launch the service
@@ -135,13 +147,27 @@ class MainFragment : Fragment() {
             activity?.stopService(Intent(activity, LocationService::class.java))
             binding.fStartStop.setImageResource(R.drawable.ic_play)
             timer?.cancel()
-            DialogManager.showSaveDialog(requireContext(), object : DialogManager.Listener {
+            DialogManager.showSaveDialog(requireContext(),
+                getRouteItem(),
+                object : DialogManager.Listener {
                 override fun onClick() {
                     showToast("Route Saved!")
                 }
             })
         }
         isServiceRunning = !isServiceRunning
+    }
+
+    // Get Route Item
+    private fun getRouteItem(): RouteItem {
+        return RouteItem(
+            null,
+            getCurrentTime(),
+            TimeUtils.getDate(),
+            String.format("%.1f", locationModel?.distance?.div(1609.34) ?: 0),
+            getAverageSpeed(locationModel?.distance ?: 0.0f),
+            geoPointsToString(locationModel?.geoPointList ?: listOf())
+        )
     }
 
     // Location service continues working after tapping on notification message
