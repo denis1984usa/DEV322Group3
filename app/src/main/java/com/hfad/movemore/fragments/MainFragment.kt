@@ -23,6 +23,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.hfad.movemore.MainApp
 import com.hfad.movemore.MainViewModel
 import com.hfad.movemore.R
 import com.hfad.movemore.databinding.FragmentMainBinding
@@ -52,8 +53,9 @@ class MainFragment : Fragment() {
     private var startTime = 0L // variable to store the start time
     private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var binding: FragmentMainBinding
-    private val model: MainViewModel by activityViewModels()
-
+    private val model: MainViewModel by activityViewModels{
+        MainViewModel.ViewModelFactory((requireContext().applicationContext as MainApp).database)
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -71,6 +73,9 @@ class MainFragment : Fragment() {
         updateTime()
         registerLocReceiver()
         locationUpdates()
+        model.routes.observe(viewLifecycleOwner) {
+            Log.d("MyLog", "List size: ${it.size}")
+        }
     }
 
     private fun setOnClicks() = with(binding) {
@@ -147,11 +152,13 @@ class MainFragment : Fragment() {
             activity?.stopService(Intent(activity, LocationService::class.java))
             binding.fStartStop.setImageResource(R.drawable.ic_play)
             timer?.cancel()
+            val route = getRouteItem()
             DialogManager.showSaveDialog(requireContext(),
-                getRouteItem(),
+                route,
                 object : DialogManager.Listener {
                 override fun onClick() {
                     showToast("Route Saved!")
+                    model.insertRoute(route)
                 }
             })
         }

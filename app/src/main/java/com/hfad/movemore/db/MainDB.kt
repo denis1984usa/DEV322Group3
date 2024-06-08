@@ -8,6 +8,7 @@ import androidx.room.RoomDatabase
 // Create Database access
 @Database (entities = [RouteItem::class], version = 1)
 abstract class MainDB : RoomDatabase() {
+    abstract fun getDao(): Dao
     companion object {
         @Volatile
         private var INSTANCE: MainDB? = null
