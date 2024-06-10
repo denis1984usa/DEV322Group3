@@ -18,8 +18,14 @@ class MainViewModel(db: MainDB) : ViewModel() {
     val timeData = MutableLiveData<String>()
     val routes = dao.getAllRoutes().asLiveData()
 
+    // Insert route
     fun insertRoute(routeItem: RouteItem) = viewModelScope.launch {
         dao.insertRoute(routeItem)
+    }
+
+    // Delete route
+    fun deleteRoute(routeItem: RouteItem) = viewModelScope.launch {
+        dao.deleteRoute(routeItem)
     }
 
     class ViewModelFactory(private val db: MainDB) : ViewModelProvider.Factory{

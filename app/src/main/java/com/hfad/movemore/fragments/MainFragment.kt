@@ -73,9 +73,6 @@ class MainFragment : Fragment() {
         updateTime()
         registerLocReceiver()
         locationUpdates()
-        model.routes.observe(viewLifecycleOwner) {
-            Log.d("MyLog", "List size: ${it.size}")
-        }
     }
 
     private fun setOnClicks() = with(binding) {
@@ -93,7 +90,7 @@ class MainFragment : Fragment() {
 
     private fun locationUpdates() = with(binding){
         model.locationUpdates.observe(viewLifecycleOwner) {
-            val distance = "Distance: ${String.format("%.1f", it.distance)} m"
+            val distance = "Distance: ${String.format("%.1f", it.distance)} mi"
             val speed = "Speed: ${String.format("%.1f", 2.23694f * it.speed)} mph"
             val aSpeed = "Average Speed: ${getAverageSpeed((it.distance))} mph"
             tvDistance.text = distance
