@@ -10,10 +10,15 @@ import com.hfad.movemore.R
 import com.hfad.movemore.databinding.RouteItemBinding
 
 // Create Recycle View adapter
-class RouteAdapter : ListAdapter<RouteItem, RouteAdapter.Holder>(Comparator()) {
-    class Holder(view : View) : RecyclerView.ViewHolder (view) {
+class RouteAdapter(private val listener: Listener) : ListAdapter<RouteItem, RouteAdapter.Holder>(Comparator()) {
+    class Holder(view : View, private val listener: Listener) : RecyclerView.ViewHolder (view), View.OnClickListener {
         private val binding = RouteItemBinding.bind(view)
+        private var routeTemp: RouteItem? = null
+        init {
+            binding.ibDelete.setOnClickListener(this)
+        }
         fun bind(route: RouteItem) = with(binding) {
+            routeTemp = route
             val speed = "${route.speed} mph"
             val time = "${route.time}"
             val distance = "${route.distance} mi"
@@ -21,6 +26,11 @@ class RouteAdapter : ListAdapter<RouteItem, RouteAdapter.Holder>(Comparator()) {
             tvTime.text = time
             tvSpeed.text = speed
             tvDistance.text = distance
+        }
+
+        // Delete a route
+        override fun onClick(v: View?) {
+            routeTemp?. let {listener.onClick(it) }
         }
     }
 
@@ -38,10 +48,15 @@ class RouteAdapter : ListAdapter<RouteItem, RouteAdapter.Holder>(Comparator()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.route_item, parent, false)
-        return Holder(view)
+        return Holder(view, listener)
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
         holder.bind(getItem(position))
+    }
+
+    interface Listener {
+        fun onClick(route: RouteItem)
+
     }
 }

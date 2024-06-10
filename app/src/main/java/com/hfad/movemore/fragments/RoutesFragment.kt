@@ -1,6 +1,7 @@
 package com.hfad.movemore.fragments
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -14,8 +15,9 @@ import com.hfad.movemore.databinding.FragmentMainBinding
 import com.hfad.movemore.databinding.RoutesBinding
 import com.hfad.movemore.databinding.ViewRouteBinding
 import com.hfad.movemore.db.RouteAdapter
+import com.hfad.movemore.db.RouteItem
 
-class RoutesFragment : Fragment() {
+class RoutesFragment : Fragment(), RouteAdapter.Listener {
     private lateinit var binding: RoutesBinding
     private lateinit var adapter: RouteAdapter
     private val model: MainViewModel by activityViewModels{
@@ -46,7 +48,7 @@ class RoutesFragment : Fragment() {
     }
 
     private fun initRcView() = with(binding) {// Init Recycle View
-        adapter = RouteAdapter()
+        adapter = RouteAdapter(this@RoutesFragment)
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
     }
@@ -54,5 +56,9 @@ class RoutesFragment : Fragment() {
     companion object {
         @JvmStatic
         fun newInstance() = RoutesFragment()
+    }
+
+    override fun onClick(route: RouteItem) {
+        model.deleteRoute(route)  // Remove current route
     }
 }
