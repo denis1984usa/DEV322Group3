@@ -15,7 +15,8 @@ class RouteAdapter(private val listener: Listener) : ListAdapter<RouteItem, Rout
         private val binding = RouteItemBinding.bind(view)
         private var routeTemp: RouteItem? = null
         init {
-            binding.ibDelete.setOnClickListener(this)
+            binding.ibDelete.setOnClickListener(this) // listener to delete a route item (card view)
+            binding.item.setOnClickListener(this) // listener to open detail's view fragment
         }
         fun bind(route: RouteItem) = with(binding) {
             routeTemp = route
@@ -28,9 +29,14 @@ class RouteAdapter(private val listener: Listener) : ListAdapter<RouteItem, Rout
             tvDistance.text = distance
         }
 
-        // Delete a route
-        override fun onClick(v: View?) {
-            routeTemp?. let {listener.onClick(it) }
+        // Delete or open a Card View
+        override fun onClick(view: View) {
+            val type = when(view.id) {
+                R.id.ibDelete -> ClickType.DELETE // delete a route item
+                R.id.item -> ClickType.OPEN // open routes' details
+                else -> ClickType.OPEN
+            }
+            routeTemp?.let {listener.onClick(it, type) }
         }
     }
 
@@ -56,7 +62,11 @@ class RouteAdapter(private val listener: Listener) : ListAdapter<RouteItem, Rout
     }
 
     interface Listener {
-        fun onClick(route: RouteItem)
+        fun onClick(route: RouteItem, type: ClickType)
+    }
 
+    enum class ClickType {
+        DELETE,
+        OPEN
     }
 }

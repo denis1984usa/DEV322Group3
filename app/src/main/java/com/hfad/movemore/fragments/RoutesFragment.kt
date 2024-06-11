@@ -16,6 +16,7 @@ import com.hfad.movemore.databinding.RoutesBinding
 import com.hfad.movemore.databinding.ViewRouteBinding
 import com.hfad.movemore.db.RouteAdapter
 import com.hfad.movemore.db.RouteItem
+import com.hfad.movemore.utils.openFragment
 
 class RoutesFragment : Fragment(), RouteAdapter.Listener {
     private lateinit var binding: RoutesBinding
@@ -58,7 +59,13 @@ class RoutesFragment : Fragment(), RouteAdapter.Listener {
         fun newInstance() = RoutesFragment()
     }
 
-    override fun onClick(route: RouteItem) {
-        model.deleteRoute(route)  // Remove current route
+    override fun onClick(route: RouteItem, type: RouteAdapter.ClickType) {
+        when(type) {
+            RouteAdapter.ClickType.DELETE -> model.deleteRoute(route) // delete card view
+            RouteAdapter.ClickType.OPEN -> {
+                model.currentRoute.value = route
+                openFragment(ViewRoutesFragment.newInstance())
+            } // open card view
+        }
     }
 }

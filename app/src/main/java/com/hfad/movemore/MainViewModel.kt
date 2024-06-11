@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 class MainViewModel(db: MainDB) : ViewModel() {
     val dao = db.getDao()
     val locationUpdates = MutableLiveData<LocationModel>()
+    val currentRoute = MutableLiveData<RouteItem>()
     val timeData = MutableLiveData<String>()
     val routes = dao.getAllRoutes().asLiveData()
 
