@@ -3,8 +3,11 @@
     <style name="Base.Theme.MoveMore" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- remove action bar -->
+        <item name="colorPrimaryVariant">@color/blue</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
     </style>
 
     <style name="Theme.MoveMore" parent="Base.Theme.MoveMore" />
