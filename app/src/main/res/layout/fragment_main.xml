@@ -27,7 +27,7 @@
     </org.osmdroid.views.MapView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/my_location_btn"
+        android:id="@+id/fCenter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
@@ -42,13 +42,13 @@
         android:id="@+id/fStartStop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         android:background="#2196F3"
         android:clickable="true"
         android:src="@drawable/ic_play"
         app:backgroundTint="#00B0F0"
-        app:layout_constraintEnd_toEndOf="@+id/my_location_btn"
-        app:layout_constraintTop_toBottomOf="@+id/my_location_btn" />
+        app:layout_constraintEnd_toEndOf="@+id/fCenter"
+        app:layout_constraintTop_toBottomOf="@+id/fCenter" />
 
     <!-- fragment_main.xml -->
     <TextView
@@ -70,7 +70,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:background="#99FFFFFF"
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
@@ -84,7 +84,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:background="#99FFFFFF"
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
@@ -98,7 +98,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:background="#99FFFFFF"
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
