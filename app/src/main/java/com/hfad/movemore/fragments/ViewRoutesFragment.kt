@@ -6,15 +6,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.hfad.movemore.MainApp
 import com.hfad.movemore.MainViewModel
+import com.hfad.movemore.R
 import com.hfad.movemore.databinding.ViewRouteBinding
 import com.hfad.movemore.databinding.RoutesBinding
 import com.hfad.movemore.databinding.FragmentMainBinding
 import org.osmdroid.config.Configuration
 import org.osmdroid.library.BuildConfig
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Polyline
 
 class ViewRoutesFragment : Fragment() {
     private lateinit var binding: ViewRouteBinding
@@ -47,7 +52,43 @@ class ViewRoutesFragment : Fragment() {
             tvTime.text = it.time
             tvAvrSpeed.text = speed
             tvDistance.text = distance
+            val polyline = getPolyline(it.geoPoints)
+            map.overlays.add(polyline)
+            setMarkers(polyline.actualPoints)
+            goToStartPosition(polyline.actualPoints[0])
         }
+    }
+
+    // Move map to start position
+    private fun goToStartPosition(startPosition: GeoPoint) {
+        binding.map.controller.zoomTo(16.0)
+        binding.map.controller.animateTo(startPosition)
+    }
+
+    // Add first and last markers for drawn routes
+    private fun setMarkers(list: List<GeoPoint>) = with(binding) {
+        val startMarker = Marker(map)
+        val finishMarker = Marker(map)
+        startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        finishMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        startMarker.icon = getDrawable(requireContext(), R.drawable.ic_start_position)
+       finishMarker.icon = getDrawable(requireContext(), R.drawable.ic_finish_position)
+        startMarker.position = list[0]
+        finishMarker.position = list[list.size - 1]
+        map.overlays.add(startMarker)
+        map.overlays.add(finishMarker)
+    }
+
+    // Add Polyline overlay to draw over the routes in a map
+    private fun getPolyline(geoPoints: String): Polyline {
+        val polyline = Polyline()
+        val list = geoPoints.split("/")
+        list.forEach {
+            if (it.isEmpty()) return@forEach
+            val points = it.split(",")
+            polyline.addPoint(GeoPoint(points[0].toDouble(), points[1].toDouble()))
+        }
+        return polyline
     }
 
     private fun settingsOsm() {
