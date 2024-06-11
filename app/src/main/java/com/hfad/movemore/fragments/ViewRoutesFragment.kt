@@ -22,8 +22,9 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 
 class ViewRoutesFragment : Fragment() {
+    private var startPoint: GeoPoint? = null
     private lateinit var binding: ViewRouteBinding
-    private val model: MainViewModel by activityViewModels{
+    private val model: MainViewModel by activityViewModels {
         MainViewModel.ViewModelFactory((requireContext().applicationContext as MainApp).database)
     }
 
@@ -41,6 +42,10 @@ class ViewRoutesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         getRoute()
+        // Move to start point when clicking Current Location button on the View Route fragment.
+        binding.fCenter.setOnClickListener {
+            if (startPoint != null) binding.map.controller.animateTo(startPoint)
+        }
     }
 
     private fun getRoute() = with (binding){
@@ -56,6 +61,7 @@ class ViewRoutesFragment : Fragment() {
             map.overlays.add(polyline)
             setMarkers(polyline.actualPoints)
             goToStartPosition(polyline.actualPoints[0])
+            startPoint = polyline.actualPoints[0] // first point
         }
     }
 
