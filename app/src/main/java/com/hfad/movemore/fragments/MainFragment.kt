@@ -53,8 +53,9 @@ class MainFragment : Fragment() {
     private var startTime = 0L // variable to store the start time
     private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var binding: FragmentMainBinding
+
     private val model: MainViewModel by activityViewModels{
-        MainViewModel.ViewModelFactory((requireContext().applicationContext as MainApp).database)
+        MainViewModel.ViewModelFactory((requireActivity().application as MainApp).database)
     }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -168,8 +169,8 @@ class MainFragment : Fragment() {
             null,
             getCurrentTime(),
             TimeUtils.getDate(),
-            String.format("%.1f", locationModel?.distance?.div(1609.34) ?: 0),
-            getAverageSpeed(locationModel?.distance ?: 0.0f),
+            String.format("%.1f", locationModel?.distance?.div(1609.34f) ?: 0f),
+            String.format("%.1f", 2.23694f * (locationModel?.distance ?: 0.0f) / ((System.currentTimeMillis() - startTime) / 1000.0f)),
             geoPointsToString(locationModel?.geoPointList ?: listOf())
         )
     }

@@ -15,7 +15,7 @@ class SplashActivity : AppCompatActivity() {
 
         Handler().postDelayed({
             // This method will be executed once the timer is over
-            // Start your app main activity
+            // Start app main activity
             startActivity(Intent(this, MainActivity::class.java))
 
             // close this activity
