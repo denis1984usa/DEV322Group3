@@ -8,7 +8,7 @@ import java.util.TimeZone
 @SuppressLint("SimpleDateFormat")
 object TimeUtils {
     val timeFormatter = SimpleDateFormat("HH:mm:ss:SSS")
-    val dateFormatter = SimpleDateFormat("mm/DD/yyyy HH:mm")
+    val dateFormatter = SimpleDateFormat("MM/dd/yyyy HH:mm")
     fun getTime(timeInMillis: Long): String {
         timeFormatter.timeZone = TimeZone.getTimeZone("UTC")
         val cv = Calendar.getInstance()

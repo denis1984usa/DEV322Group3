@@ -108,7 +108,7 @@ class LocationService : Service() {
             this,
             10,
             nIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT // Add the appropriate flag
+            PendingIntent.FLAG_IMMUTABLE // Add the appropriate flag
         )
         val notification = NotificationCompat.Builder(
             this,

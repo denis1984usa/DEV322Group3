@@ -99,7 +99,7 @@ class MainFragment : Fragment() {
 
     private fun locationUpdates() = with(binding){
         model.locationUpdates.observe(viewLifecycleOwner) {
-            val distance = "Distance: ${String.format("%.1f", it.distance)} mi"
+            val distance = "Distance: ${String.format("%.1f", it.distance)} m"
             val speed = "Speed: ${String.format("%.1f", 2.23694f * it.speed)} mph"
             val aSpeed = "Average Speed: ${getAverageSpeed((it.distance))} mph"
             tvDistance.text = distance
@@ -260,15 +260,13 @@ class MainFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun checkPermissionAndroidTenAndGreater() {
         if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-            && checkPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         ) {
             initOSM()
             checkLocationEnabled()
         } else {
             pLauncher.launch(
                 arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    Manifest.permission.ACCESS_FINE_LOCATION
                 )
             )
         }

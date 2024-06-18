@@ -52,7 +52,7 @@ class ViewRoutesFragment : Fragment() {
         model.currentRoute.observe(viewLifecycleOwner) {
             val speed = "Average speed: ${it.speed} mph"
             val distance = "Distance: ${it.distance} mi"
-            val date = "Date: ${it.date} mi"
+            val date = "Date: ${it.date}"
             tvDate.text = date
             tvTime.text = it.time
             tvAvrSpeed.text = speed
