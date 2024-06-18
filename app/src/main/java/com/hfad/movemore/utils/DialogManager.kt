@@ -20,7 +20,7 @@ object DialogManager {
         dialog.setMessage(context.getString(R.string.location_dialog_message))
         // Set buttons
         dialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES") { _, _ ->
-            Toast.makeText(context, "YES", Toast.LENGTH_SHORT).show()
+            listener.onClick()
         }
         dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO") { _, _ ->
             Toast.makeText(context, "NO", Toast.LENGTH_SHORT).show()
