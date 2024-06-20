@@ -58,6 +58,7 @@ class ViewRoutesFragment : Fragment() {
             tvAvrSpeed.text = speed
             tvDistance.text = distance
             val polyline = getPolyline(it.geoPoints)
+            if (polyline.actualPoints.isEmpty()) return@observe
             map.overlays.add(polyline)
             setMarkers(polyline.actualPoints)
             goToStartPosition(polyline.actualPoints[0])
@@ -73,6 +74,7 @@ class ViewRoutesFragment : Fragment() {
 
     // Add first and last markers for drawn routes
     private fun setMarkers(list: List<GeoPoint>) = with(binding) {
+        if(list.size < 2) return@with // code will not start if there are less than 2 points
         val startMarker = Marker(map)
         val finishMarker = Marker(map)
         startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
