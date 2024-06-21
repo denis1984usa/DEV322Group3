@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    id 'kotlin-kapt' // Apply Kotlin Kapt plugin
 }
 
 android {
@@ -32,14 +33,21 @@ android {
     }
     buildFeatures {
         viewBinding true
-}
+    }
 
 }
 
 dependencies {
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.8.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.1'
+    implementation 'androidx.room:room-ktx:2.6.1' // Room Persistence Library
+    kapt 'androidx.room:room-compiler:2.6.1' // Room Compiler
+
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation "androidx.fragment:fragment-ktx:1.7.1"//fragment
     implementation 'org.osmdroid:osmdroid-android:6.1.10' // libraries for OpenStreetMaps
     implementation 'com.github.MKergall:osmbonuspack:6.7.0' // libraries for OpenStreetMaps
-
+    implementation 'com.google.android.gms:play-services-location:21.3.0' // FusedLocationUpdate client
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.material
