@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.hfad.movemore.R
+import com.hfad.movemore.fragments.MainFragment
 
 // switching between fragments function
 fun Fragment.openFragment(f: Fragment) {
@@ -17,10 +18,17 @@ fun Fragment.openFragment(f: Fragment) {
 }
 
 fun AppCompatActivity.openFragment(f: Fragment) {
-    supportFragmentManager
-        .beginTransaction()
-        //.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-        .replace(R.id.placeholder, f).commit()
+    if (f is MainFragment){
+        supportFragmentManager
+            .beginTransaction()
+            //.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+            .replace(R.id.placeholder, f).commit()
+    } else {
+        supportFragmentManager
+            .beginTransaction().addToBackStack(null)
+            //.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+            .replace(R.id.placeholder, f).commit()
+    }
 }
 
 fun Fragment.showToast(s: String) {
